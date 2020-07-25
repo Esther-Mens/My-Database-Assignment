@@ -1,0 +1,90 @@
+1. SELECT COUNT (DISTINCT(u_id)) FROM users;
+
+ --Disntinct was used because a user may have multiple wave account linked together.
+
+
+  2. SELECT COUNT (transfer_id) FROM transfers 
+     WHERE send_amount_currency = 'CFA';
+
+  -- The 'COUNT' function is used to count the number of rows. The function gives the amount of money sent in CFA. 
+
+
+  3. SELECT COUNT(DISTINCT(u_id))
+     FROM transfers
+     WHERE send_amount_currency = 'CFA';
+
+ 
+
+4. SELECT DATE_PART('month', when_created) AS Months , COUNT(atx_id) AS Number_agent_transactions
+FROM agent_transactions
+WHERE DATE_PART('year', when_created)=2008
+GROUP BY 1;
+-- DATE_PART() can be used to extract multiple parts of a date, 
+ as it has been used to name the new queried column table. 
+ 
+ 
+ 
+
+5)
+SELECT DATE_PART('week', when_created) AS Week,
+COUNT (amount) AS no_transaction_for_the_week,
+COUNT (amount) FILTER (WHERE amount <0) AS No_depositors,
+SUM (amount) FILTER (WHERE amount < 0)
+AS Net_depositors,
+COUNT (amount) FILTER (WHERE amount >0) AS No_withdrawers,
+SUM (amount) FILTER (WHERE amount > 0)
+AS Net_withdrawals
+FROM agent_transactions
+GROUP BY 1;
+
+ 
+
+6) 
+SELECT agents.city AS Agent_City, 
+COUNT(atx_id) AS Atx_volume_city
+FROM agent_transactions 
+INNER JOIN agents 
+ON agents.agent_id = agent_transactions.agent_id
+WHERE agent_transactions.when_created > (NOW() - INTERVAL '1 WEEK') 
+GROUP BY 1;
+
+
+
+
+
+
+ 7. SELECT agents.city As Agent_City,
+agents.country AS Agents_Country,
+COUNT (atx_id) AS Atx_volume_City_by_Country
+FROM agent_transactions
+INNER JOIN agents
+ON agents.agent_id = agent_transactions.agent_id
+WHERE (agent_transactions.when_created > (NOW() - INTERVAL '1 Week' ))
+GROUP BY 1,2;
+
+
+8.  SELECT wallets.ledger_location AS Country,
+transfers.kind AS Kind,
+SUM(transfers.send_amount_scalar) AS Volume
+FROM transfers, wallets
+WHERE transfers.time_created > (NOW() - INTERVAL '1 Week')
+GROUP BY 1,2;
+
+
+9. SELECT wallets.ledger_location AS Country,
+transfers.kind AS Kind,
+SUM(transfers.send_amount_scalar) AS Volume,
+COUNT (DISTINCT (transfers.source_wallet_id)) AS Unique_Sender,
+COUNT (transfer_id) AS Transaction_Count
+FROM transfers, wallets
+WHERE transfers.TIME_created > (NOW() - INTERVAL '1 Week')
+GROUP BY 1,2;
+
+
+
+10. SELECT DISTINCT(source_wallet_id) AS Source_Wallet_id,
+SUM(send_amount_scalar) AS Amount_sent
+FROM transfers
+WHERE send_amount_currency = 'CFA' AND (send_amount_scalar > 10000000)
+AND transfers.time_created > (NOW() - INTERVAL '1 month')
+GROUP BY 1;
